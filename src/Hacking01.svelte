@@ -1,7 +1,12 @@
 <script>
 	import { onDestroy } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
+
 	import { createObserver } from 'svelte-use-io';
 	const { observer } = createObserver({ trackVisibility: true, delay: 100 });
+
+  const dispatch = createEventDispatcher();
+
 	// const doStuff = ({ detail }) => console.log({ detail });
   const doStuff = ({detail}) => {
     console.log("+", detail.target.innerText, detail.isVisible);
@@ -13,8 +18,25 @@
   };
 	// { detail: IntersectionObserverEntry }
 
-  import Page from './lib/Page02.svelte';
-  import manifest from './lib/manifest.json';
+  const handleZoom = function(event) {
+    let delta = 2;
+    if ( event.shiftKey ) {
+      delta = 0.5;
+    }
+    zoom *= delta;
+    dispatch('updateZoom', zoom);
+  }
+
+  import Page from './lib/Page04.svelte';
+  import manifest from './lib/manifest3.json';
+
+  manifest.items.forEach((item) => {
+    item.originalHeight = item.height;
+    item.originalWidth = item.width;
+  })
+
+  $: zoom = 1;
+
 </script>
 
 <style>
@@ -43,6 +65,15 @@
     background: darkslateblue;
     color: yellow;
   }
+
+  .toolbar {
+    position: fixed;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
 </style>
 
 <!-- <ul>
@@ -59,7 +90,7 @@
 
 <section>
   {#each manifest.items as canvas}
-  <Page {observer} {canvas} seq={canvas.seq}></Page>
+  <Page {observer} {canvas} seq={canvas.seq} bind:zoom={zoom}></Page>
   {/each}
 </section>
 
@@ -67,6 +98,11 @@
   <a href="#id1">Item 1</a>
   <a href="#id10">Item 10</a>
   <a href="#id50">Item 50</a>
+  <a href="#id90">Item 90</a>
   <a href="#id100">Item 100</a>
   <a href="#id800">Item 800</a>
 </nav>
+
+<div class="toolbar">
+  <button on:click={handleZoom}>🔍 <span>{zoom}</span></button>
+</div>
