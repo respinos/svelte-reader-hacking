@@ -1,5 +1,7 @@
 import './hacking01.css'
-import App from './Hacking01.svelte'
+
+// import Queue from "queue-promise";
+import App from './components/View05.svelte'
 
 const app = new App({
   target: document.getElementById('app'),
