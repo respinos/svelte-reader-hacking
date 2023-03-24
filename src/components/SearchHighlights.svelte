@@ -4,7 +4,6 @@
 
   export let page_coords = [];
   export let matches = [];
-  export let scan;
   export let image;
 
   let highlights = [];
@@ -115,7 +114,7 @@
   :global(mark.highlight) {
     position: absolute;
     background: greenyellow;
-    opacity: 0.4;
+    opacity: 0.2;
   }
 
 </style>

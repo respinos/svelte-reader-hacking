@@ -1,9 +1,10 @@
 <script>
 
   import { onMount } from 'svelte';
+  import { setContext } from 'svelte';
 
   import PageText from './PageText.svelte';
-  import SearchHighlights from './SearchHighlights.svelte';
+  // import SearchHighlights from './SearchHighlights.svelte';
 
   export let observer;
   export let seq;
@@ -329,7 +330,6 @@
     <button type="button" class="btn btn-outline-dark" on:click={rotateScan}><i class="bi bi-arrow-clockwise"></i></button>
     <span class="badge bg-secondary d-flex align-items-center p-2">#{seq}</span>
   </div>
-  <PageText hidden={true} canvas={canvas} image={image} updateMatches={updateMatches} seq={seq}></PageText>
   <div class="frame" data-orient={orient} style="--orient-margin: {orientMargin}">
     <div class="debug" style="--width: {testWidth}px; --height: {testHeight}px;"></div>
     <span>Item {seq}</span>
@@ -337,8 +337,9 @@
       <img src={thumbnailSrc} class:loaded={isLoaded} aria-hidden="true" class="thumbnail" alt="" />
       {#if isVisible}
           <img class="actual" class:loaded={isLoaded} src="" bind:this={image} on:load={imageOnLoad} data-rotate="{rotateX}" />
+          <PageText hidden={true} canvas={canvas} image={image} seq={seq}></PageText>
       {/if}
-      <SearchHighlights image={image} scan={scan} page_coords={page_coords} matches={matches}></SearchHighlights>
+      <!-- <SearchHighlights image={image} scan={scan} page_coords={page_coords} matches={matches}></SearchHighlights> -->
     </div>
   </div>
 </div>

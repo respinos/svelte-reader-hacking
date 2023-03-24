@@ -1,14 +1,16 @@
 <script>
 
   import { onMount } from 'svelte';
+  import { getContext } from 'svelte';
+  import SearchHighlights from './SearchHighlights.svelte';
 
   export let hidden = false;
   export let seq;
   export let canvas;
   export let image;
-  export let updateMatches;
 
   let matches = [];
+  let page_coords;
 
   let pageText;
 
@@ -20,7 +22,7 @@
     }
 
     var timestamp = (new Date).getTime();
-    var page_coords = parseCoords(ocr_div.dataset.coords);
+    page_coords = parseCoords(ocr_div.dataset.coords);
     var word_regexes = {};
     let word;
     words.forEach((word) => {
@@ -65,11 +67,12 @@
       matches.push(span);
     })
 
-    console.log("AHOY UPDATING", matches);
-    updateMatches(page_coords, matches);
+    console.log("AHOY MATCHES", matches);
+    matches = matches;
   }
 
   const loadPageText = function() {
+    if ( pageText && pageText.querySelector('.ocr_page') ) { return ; }
     let text_src = `/cgi/imgsrv/html?id=${canvas.id}&seq=${seq}`;
     // need to deal with q1
     fetch(text_src)
@@ -81,6 +84,7 @@
         const parser = new DOMParser();
         const ocr_div = parser.parseFromString(text, 'text/html').body.childNodes[0];
         ocr_div.dataset.words = `["lowndes"]`;
+        ocr_div.classList.add('visually-hidden');
         pageText.append(ocr_div);
 
         let words = JSON.parse(ocr_div.dataset.words || '[]');
@@ -94,6 +98,7 @@
   }
 
   $: if (image) { loadPageText() }
+  $: if ( getContext('answer') ) { console.log("AHOY HAVE ANSWER", seq); }
 
 </script>
 
@@ -114,12 +119,20 @@
     clip: rect(1px, 1px, 1px, 1px);
   }
 
-  :global(mark.highlight) {
+  .page-text {
+    position: relative;
+    grid-area: 1/1;
+    width: 100%;
+  }
+
+  /* :global(mark.highlight) {
     position: absolute;
     background: greenyellow;
     opacity: 0.4;
-  }
+  } */
 
 </style>
 
-<div class="page-text" bind:this={pageText} class:hidden={hidden}></div>
+<div class="page-text" bind:this={pageText}>
+  <SearchHighlights image={image} page_coords={page_coords} matches={matches}></SearchHighlights>
+</div>
