@@ -1,12 +1,14 @@
 <script>
 
   import { onMount } from 'svelte';
+  import { afterUpdate } from 'svelte';
   import { setContext } from 'svelte';
 
   import PageText from './PageText.svelte';
   // import SearchHighlights from './SearchHighlights.svelte';
 
   export let observer;
+  export let thumbnailer;
   export let seq;
   export let canvas;
   export let zoom;
@@ -21,6 +23,19 @@
     } else {
       unloadImage();
     }
+  }
+
+  function loadThumbnail() {
+    if ( thumbnailSrc != defaultThumbnailSrc ) { return; }
+    console.log(":::::: loading thumbnail", seq);
+    thumbnailSrc = `/cgi/imgsrv/thumbnail?id=${canvas.id}&seq=${seq}&height=100`;
+  }
+
+  function queueThumbnail(node) {
+    thumbnailer.add(() => {
+      console.log("-- queue thumbnail", seq);
+      return loadThumbnail();
+    })
   }
 
   let scan;
@@ -70,35 +85,6 @@
     console.log("---- unload", seq, image);
   }
 
-  const doStuff = ({detail}) => {
-    console.log("++", seq, detail.isVisible);
-    detail.target.dataset.visible = true;
-    isVisible = true;
-
-    let height = scanHeight * window.devicePixelRatio;
-
-    // let img_src = `/cgi/imgsrv/image?id=${canvas.id}&seq=${seq}&height=${height}`;
-    // fetch(img_src)
-    //   .then((response) => {
-    //     let size = response.headers.get('x-image-size');
-    //     console.log(...response.headers);
-    //     let parts = size.split('x');
-    //     let ratio = canvas.height / parseInt(parts[1], 10);
-    //     let width = Math.ceil(parseInt(parts[0], 10) * ratio);
-    //     canvas.width = width;
-    //     console.log("--", seq, size, `${canvas.width}x${canvas.height}`);
-    //     return response.blob();
-    //   })
-    //   .then(blob => {
-    //     objectUrl = URL.createObjectURL(blob);
-    //     if ( image ) {
-    //       image.src = objectUrl;
-    //     } else {
-    //       URL.revokeObjectURL(objectUrl);
-    //     }
-    //   })
-  };
-
   const imageOnLoad = function(event) {
     if ( rotateX != 0 ) { return ; }
     console.log("!", seq, rotateX, event.target.naturalWidth, event.target.naturalHeight);
@@ -107,15 +93,6 @@
     //   scanAdjusted = true;
     // }
   }
-
-  const undoStuff = ({detail}) => {
-    if ( image === undefined ) { return ; }
-    console.log("--", seq, detail.isVisible);
-    detail.target.dataset.visible = false;
-    isVisible = false;
-    URL.revokeObjectURL(objectUrl);
-    image.src = null;
-  };
 
   const rotateScan = function() {
     orient = ( orient + 90 ) % 360;
@@ -334,7 +311,7 @@
     <div class="debug" style="--width: {testWidth}px; --height: {testHeight}px;"></div>
     <span>Item {seq}</span>
     <div class="scan" bind:this={scan} class:adjusted={scanAdjusted} style="--width: {scanWidth}px; --height: {scanHeight}px;" >
-      <img src={thumbnailSrc} class:loaded={isLoaded} aria-hidden="true" class="thumbnail" alt="" />
+      <img src={thumbnailSrc} use:queueThumbnail class:loaded={isLoaded} aria-hidden="true" class="thumbnail" alt="" />
       {#if isVisible}
           <img class="actual" class:loaded={isLoaded} src="" bind:this={image} on:load={imageOnLoad} data-rotate="{rotateX}" />
           <PageText hidden={true} canvas={canvas} image={image} seq={seq}></PageText>

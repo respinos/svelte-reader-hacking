@@ -80,6 +80,7 @@
         return response.text();
       })
       .then(text => {
+        if ( ! pageText ) { return ; }
         // pageText = text.replace('<div class="ocr_page"', '<div class="ocr_page" data-words="[&quot;lowndes&quot;]"');
         const parser = new DOMParser();
         const ocr_div = parser.parseFromString(text, 'text/html').body.childNodes[0];

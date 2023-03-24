@@ -15,6 +15,37 @@
     interval: 5000,
   })
 
+  const thumbnailer = new PQueue({
+    concurrency: 1,
+    intervalCap: 1,
+    interval: 1500,
+  })
+
+  // const loadPageThumbnail = function(seq) {
+  //   let pageDatum = manifestMap[seq];
+  //   if ( ! pageDatum.page ) { return ; }
+  //   thumbnailQueue.add(() => {
+  //     console.log("-- queue thumbnail", seq, pageDatum);
+  //     return pageDatum.page.loadThumbnail();
+  //   })
+  // }
+
+  // const thumbnailer = function(node) {
+  //   // the node has been mounted in the DOM
+  //   let seq = parseInt(node.dataset.seq, 10);
+  //   loadPageThumbnail(seq);
+
+  //   return {
+  //     update() {
+  //       loadPageThumbnail(seq);
+  //     },
+
+  //     destroy() {
+  //       // end
+  //     }
+  //   }
+  // }
+
 	import { createObserver } from 'svelte-use-io';
 
 	const { observer, io } = createObserver({
@@ -235,7 +266,8 @@
     {handleIntersecting}
     {handleUnintersecting}
     seq={canvas.seq} 
-    bind:zoom={zoom}></Page>
+    bind:zoom={zoom}
+    {thumbnailer}></Page>
   {/each}
 </section>
 
